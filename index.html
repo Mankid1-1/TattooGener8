@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- iOS / PWA Capable -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+
+    <title>TattooCrate - AI Tattoo Designer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Cinzel', 'serif'],
+            },
+            colors: {
+              ink: {
+                50: '#f8fafc',
+                100: '#f1f5f9',
+                400: '#94a3b8',
+                500: '#64748b',
+                800: '#1e293b',
+                900: '#0f172a',
+                950: '#020617',
+              },
+              accent: {
+                gold: '#fbbf24',
+                red: '#ef4444'
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Mobile App Behavior */
+      html, body {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: pan-y;
+        background-color: #0f172a; /* Ink 900 */
+      }
+      
+      /* Inputs should still be selectable */
+      input, textarea {
+        -webkit-user-select: text;
+        user-select: text;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #1e293b; }
+      ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+      
+      /* Realistic Ink Blending */
+      .blend-multiply { mix-blend-mode: multiply; }
+      .blend-overlay { mix-blend-mode: overlay; }
+      
+      /* Print Styles */
+      @media print {
+        @page { margin: 0; size: auto; }
+        body { margin: 0; padding: 0; background: white; color: black; }
+        .no-print { display: none !important; }
+        .print-only { display: block !important; }
+        .page-break { page-break-after: always; break-after: page; }
+        * { position: static !important; transform: none !important; box-shadow: none !important; text-shadow: none !important; }
+        img { max-width: 100% !important; height: auto !important; filter: grayscale(100%) contrast(150%); }
+      }
+
+      /* Utilities */
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      .safe-top { padding-top: env(safe-area-inset-top); }
+      .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@latest"
+  }
+}
+</script>
+</head>
+  <body class="bg-ink-900 text-ink-50 antialiased selection:bg-accent-gold selection:text-ink-950 font-sans overscroll-none safe-bottom">
+    <div id="root"></div>
+  </body>
+</html>
