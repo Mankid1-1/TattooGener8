@@ -66,7 +66,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
         
         {/* Concept Section */}
         <div className="space-y-4">
-          <label className="flex items-center space-x-2 text-xs font-bold text-ink-400 uppercase tracking-widest">
+          <label htmlFor="concept-input" className="flex items-center space-x-2 text-xs font-bold text-ink-400 uppercase tracking-widest cursor-pointer">
             <span className="text-accent-gold">01.</span>
             <span>Tattoo Concept</span>
           </label>
@@ -74,6 +74,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
           <Tooltip content="Describe your tattoo idea" position="top" className="w-full">
             <div className="relative group w-full">
               <input 
+                id="concept-input"
                 type="text" 
                 value={concept}
                 onChange={(e) => setConcept(e.target.value)}
