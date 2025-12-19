@@ -243,12 +243,12 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Tooltip content="Reset Studio" position="bottom">
-                  <div className="flex items-center gap-2 cursor-pointer group" onClick={handleReset}>
+                  <button type="button" className="flex items-center gap-2 cursor-pointer group" onClick={handleReset}>
                       <div className="w-8 h-8 bg-accent-gold text-black rounded flex items-center justify-center shadow-lg shadow-accent-gold/20 transform group-hover:rotate-180 transition-transform duration-500">
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                       </div>
                       <span className="font-display font-black text-xl tracking-wider text-white hidden md:block">TATTOO<span className="text-accent-gold">CRATE</span></span>
-                  </div>
+                  </button>
               </Tooltip>
               
               <div className="hidden md:flex bg-ink-900 rounded border border-ink-800 p-0.5">
