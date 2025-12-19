@@ -1,12 +1,18 @@
 
-
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import { AppTier, GenerationParams, BodyPlacement, TattooStyle } from "../types";
+
+// Security Note: We use specific HarmCategory enums required by the GoogleGenAI SDK to ensure
+// safety settings are correctly applied. Incorrect strings are ignored or cause type errors.
 
 export const generateTattooDesign = async (params: GenerationParams): Promise<{ imageUrl: string; prompt: string }> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const { concept, placement, style, tier, variationIndex = 0, isProjectItem = false } = params;
+
+  // 🛡️ SENTINEL: Input Sanitization
+  // Truncate concept to prevent massive prompts (DoS/Token exhaustion)
+  const sanitizedConcept = concept.slice(0, 1000).replace(/[^\w\s.,!?'"-]/g, "");
 
   // Use Flash model for speed and efficiency.
   const modelName = 'gemini-2.5-flash-image';
@@ -44,7 +50,7 @@ export const generateTattooDesign = async (params: GenerationParams): Promise<{ 
   const prompt = `
     Generate an image of a professional tattoo design.
     
-    SUBJECT: "${concept}"
+    SUBJECT: "${sanitizedConcept}"
     STYLE: ${style}
     VARIATION_SEED: ${variationIndex}
     
@@ -79,11 +85,12 @@ export const generateTattooDesign = async (params: GenerationParams): Promise<{ 
       config: {
         imageConfig,
         // Relax safety settings to allow artistic depiction of skulls, weapons, etc common in tattoos
+        // Using explicit enums as required by the GoogleGenAI SDK to ensure type safety
         safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
         ]
       },
     });
