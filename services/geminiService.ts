@@ -14,13 +14,21 @@ export const generateTattooDesign = async (params: GenerationParams): Promise<{ 
   // Truncate concept to prevent massive prompts (DoS/Token exhaustion)
   const sanitizedConcept = concept.slice(0, 1000).replace(/[^\w\s.,!?'"-]/g, "");
 
+  // 🛡️ SENTINEL: Enum Validation
+  // Ensure 'style' and 'placement' are valid enum values to prevent prompt injection.
+  const isValidStyle = Object.values(TattooStyle).includes(style);
+  const safeStyle = isValidStyle ? style : TattooStyle.TRADITIONAL;
+
+  const isValidPlacement = Object.values(BodyPlacement).includes(placement);
+  const safePlacement = isValidPlacement ? placement : BodyPlacement.PAPER;
+
   // Use Flash model for speed and efficiency.
   const modelName = 'gemini-2.5-flash-image';
 
   let visualContext = "";
   
   // If it's a Project Item (for the Sleeve Builder) OR explicitly Paper Flash
-  if (isProjectItem || placement === BodyPlacement.PAPER) {
+  if (isProjectItem || safePlacement === BodyPlacement.PAPER) {
       visualContext = `
       TASK: Generate a TATTOO FLASH ELEMENT.
       BACKGROUND: Pure white background (#FFFFFF). 
@@ -34,8 +42,8 @@ export const generateTattooDesign = async (params: GenerationParams): Promise<{ 
       // Single Shot Visualizer Mode
       visualContext = `
       TASK: Generate a TATTOO VISUALIZATION ON SKIN.
-      BODY PLACEMENT: ${placement}.
-      RENDERING: Show the tattoo design inked on the ${placement} of a human body.
+      BODY PLACEMENT: ${safePlacement}.
+      RENDERING: Show the tattoo design inked on the ${safePlacement} of a human body.
       Lighting should be studio quality.
       Skin texture should be realistic.
       `;
@@ -43,7 +51,7 @@ export const generateTattooDesign = async (params: GenerationParams): Promise<{ 
 
   // Handle style-specific overrides
   let styleSpecifics = "";
-  if (style === TattooStyle.GEOMETRIC) {
+  if (safeStyle === TattooStyle.GEOMETRIC) {
       styleSpecifics = "STYLE DETAILS: Focus on mandalas, sacred geometry, and shading achieved through stippling (dots). Emphasize mathematical precision, symmetry, and fine dotwork texture.";
   }
 
@@ -51,7 +59,7 @@ export const generateTattooDesign = async (params: GenerationParams): Promise<{ 
     Generate an image of a professional tattoo design.
     
     SUBJECT: "${sanitizedConcept}"
-    STYLE: ${style}
+    STYLE: ${safeStyle}
     VARIATION_SEED: ${variationIndex}
     
     ${visualContext}
