@@ -7,6 +7,7 @@ import { CreativeEditor } from './CreativeEditor';
 import { PlacementCanvas } from './PlacementCanvas';
 import { ClientWaiverModal } from './ClientWaiverModal';
 import { Tooltip } from './Tooltip';
+import { DesignGridItem } from './DesignGridItem';
 
 interface DesignViewerProps {
   designs: DesignData[];
@@ -30,6 +31,10 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
 
   const focusedDesign = designs.find(p => p.id === focusedId);
+
+  const handleSelectDesign = React.useCallback((id: string) => {
+    setFocusedId(id);
+  }, []);
 
   const handlePrint = (design?: DesignData) => {
     // Before printing, check if waiver is signed? 
@@ -138,30 +143,12 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
       {/* Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {designs.map((design, idx) => (
-            <div key={design.id} className="group relative aspect-[3/4] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-2xl transition-all">
-                <img 
-                    src={design.modifiedUrl || design.originalUrl} 
-                    className="w-full h-full object-cover" 
-                    alt={`Design ${idx+1}`} 
-                />
-                
-                {/* Number Badge */}
-                <div className="absolute top-2 left-2 px-2 py-1 bg-black/80 text-white text-[10px] font-mono rounded">
-                    #{idx + 1}
-                </div>
-                
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
-                    <Tooltip content="Inspect & Edit">
-                      <button 
-                          onClick={() => setFocusedId(design.id)}
-                          className="p-3 bg-white rounded-full text-black hover:scale-110 transition-transform shadow-lg"
-                      >
-                          <ZoomIn className="w-5 h-5" />
-                      </button>
-                    </Tooltip>
-                </div>
-            </div>
+          <DesignGridItem
+            key={design.id}
+            design={design}
+            index={idx}
+            onSelect={handleSelectDesign}
+          />
         ))}
       </div>
 
