@@ -8,6 +8,7 @@ import { PlacementCanvas } from './PlacementCanvas';
 import { ClientWaiverModal } from './ClientWaiverModal';
 import { Tooltip } from './Tooltip';
 import { DesignGridItem } from './DesignGridItem';
+import { escapeHtml } from '../utils/security';
 
 interface DesignViewerProps {
   designs: DesignData[];
@@ -46,7 +47,7 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
     printWindow.document.write(`
       <html>
         <head>
-          <title>${concept} - Tattoo Flash</title>
+          <title>${escapeHtml(concept)} - Tattoo Flash</title>
           <style>
             @media print {
                @page { size: ${paperSize.toLowerCase()}; margin: 0; }
@@ -70,7 +71,7 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
             <div class="page">
               <img src="${p.modifiedUrl || p.originalUrl}" />
               <div class="meta">
-                 TATTOOCRATE REF: ${p.id} | CONCEPT: ${concept.toUpperCase()}
+                 TATTOOCRATE REF: ${p.id} | CONCEPT: ${escapeHtml(concept.toUpperCase())}
               </div>
             </div>
           `).join('')}
