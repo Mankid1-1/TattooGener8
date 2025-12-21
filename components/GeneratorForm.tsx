@@ -79,6 +79,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
                 value={concept}
                 onChange={(e) => setConcept(e.target.value)}
                 placeholder={mode === ProjectMode.PROJECT ? "e.g. Ocean theme sleeve with ships and kraken..." : "e.g. A roaring tiger, black and grey..."}
+                aria-describedby="concept-helper"
                 className="w-full px-6 py-5 rounded-lg bg-ink-900 border border-ink-600 focus:border-accent-gold focus:ring-1 focus:ring-accent-gold outline-none transition-all text-lg font-medium text-white placeholder:text-ink-600"
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-600 pointer-events-none group-focus-within:text-accent-gold transition-colors">
@@ -86,6 +87,18 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoad
               </div>
             </div>
           </Tooltip>
+
+          {/* Smart Input Guidance */}
+          <div className="flex items-center justify-between px-1">
+             <p id="concept-helper" className={`text-xs font-medium transition-colors ${!concept ? 'text-ink-400' : concept.length < 10 ? 'text-blue-400' : 'text-green-400'}`}>
+                {!concept && "Describe the subject, style, and mood."}
+                {concept && concept.length < 10 && "Tip: Add more details for better results..."}
+                {concept && concept.length >= 10 && "✨ Great description! Ready to generate."}
+             </p>
+             <span className={`text-xs font-mono ${concept.length > 1000 ? 'text-red-400' : 'text-ink-600'}`}>
+                {concept.length}/1000
+             </span>
+          </div>
 
           {/* Inspiration Rail */}
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
