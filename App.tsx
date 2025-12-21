@@ -1,6 +1,5 @@
 
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BodyPlacement, AppTier, TattooStyle, CollectionSize, DesignData, PortfolioState, AppView, AppSettings, PaperSize, ProjectMode } from './types';
 import { generateTattooDesign } from './services/geminiService';
 import { purchaseSubscription, restorePurchases, setPurchaseFlag } from './services/storeService';
@@ -122,7 +121,7 @@ const App: React.FC = () => {
       }
   };
 
-  const handleGenerate = async (concept: string, placement: BodyPlacement, style: TattooStyle, size: number, mode: ProjectMode) => {
+  const handleGenerate = useCallback(async (concept: string, placement: BodyPlacement, style: TattooStyle, size: number, mode: ProjectMode) => {
     if (tier === AppTier.FREE && size > 1) {
         setShowUpgradeModal(true);
         return;
@@ -193,7 +192,7 @@ const App: React.FC = () => {
     if (successCount === 0 && size > 0) {
         alert("Could not generate designs. Please try a different concept or check your connection.");
     }
-  };
+  }, [tier]);
 
   const handleRegenerateSinglePage = async (pageId: string) => {
       const pageIndex = portfolioState.designs.findIndex(p => p.id === pageId);
@@ -234,6 +233,8 @@ const App: React.FC = () => {
           designs: prev.designs.map(p => p.id === pageId ? { ...p, modifiedUrl: newUrl } : p)
       }));
   };
+
+  const handleShowUpgrade = useCallback(() => setShowUpgradeModal(true), []);
 
   return (
     <div className="min-h-screen font-sans bg-ink-900 text-ink-50 selection:bg-accent-gold selection:text-black pb-20 md:pb-0">
@@ -316,7 +317,7 @@ const App: React.FC = () => {
                     onGenerate={handleGenerate} 
                     isLoading={loading}
                     tier={tier}
-                    onUpgrade={() => setShowUpgradeModal(true)}
+                    onUpgrade={handleShowUpgrade}
                 />
             </div>
 
