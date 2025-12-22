@@ -21,8 +21,29 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
 
   const isFormValid = formData.name && formData.dob && formData.signature.length > 2;
 
+  // 🛡️ SENTINEL: Input Validation & Sanitization
+  // Block obviously dangerous characters commonly used in XSS (<, >) while allowing
+  // international names (accents, etc). React escapes output by default, so this is
+  // an extra layer of defense (Defense in Depth).
+  const hasDangerousChars = (text: string) => {
+      return /[<>]/.test(text);
+  };
+
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = () => {
+    setError(null);
     if (!isFormValid) return;
+
+    if (hasDangerousChars(formData.name) || hasDangerousChars(formData.signature)) {
+        setError("Invalid characters detected. Please remove < or > symbols.");
+        return;
+    }
+
+    if (formData.name.length > 50 || formData.signature.length > 50) {
+        setError("Name fields must be under 50 characters.");
+        return;
+    }
     
     // Check contraindications
     if (formData.pregnant || formData.chemical) {
@@ -144,17 +165,24 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50 flex justify-end gap-4">
-            <button onClick={onClose} className="px-6 py-2 text-sm font-bold text-gray-500 hover:text-black uppercase">Cancel</button>
-            <Tooltip content={!isFormValid ? "Complete all required fields" : "Submit Waiver"}>
-                <button 
-                    onClick={handleSubmit}
-                    disabled={!isFormValid}
-                    className={`px-8 py-3 rounded text-sm font-bold uppercase tracking-wider flex items-center gap-2 ${isFormValid ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-                >
-                    <Check className="w-4 h-4" /> Sign & Proceed
-                </button>
-            </Tooltip>
+        <div className="p-6 border-t border-gray-200 bg-gray-50 flex flex-col items-end gap-4">
+            {error && (
+                <div className="text-red-600 text-sm font-bold bg-red-50 px-4 py-2 rounded border border-red-200 flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4" /> {error}
+                </div>
+            )}
+            <div className="flex gap-4">
+                <button onClick={onClose} className="px-6 py-2 text-sm font-bold text-gray-500 hover:text-black uppercase">Cancel</button>
+                <Tooltip content={!isFormValid ? "Complete all required fields" : "Submit Waiver"}>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={!isFormValid}
+                        className={`px-8 py-3 rounded text-sm font-bold uppercase tracking-wider flex items-center gap-2 ${isFormValid ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                    >
+                        <Check className="w-4 h-4" /> Sign & Proceed
+                    </button>
+                </Tooltip>
+            </div>
         </div>
 
       </div>
