@@ -128,6 +128,7 @@ const App: React.FC = () => {
     }
 
     setLoading(true);
+    // Initialize loading progress
     setLoadingProgress(size > 1 ? { current: 0, total: size } : undefined);
     
     // If starting a new project or switching concepts, reset logic can be here. 
@@ -141,10 +142,13 @@ const App: React.FC = () => {
     });
 
     let successCount = 0;
+    let permissionDenied = false;
 
-    for (let i = 0; i < size; i++) {
-        if (size > 1) setLoadingProgress({ current: i + 1, total: size });
-        
+    // Helper to generate a single item.
+    // NOTE: generateTattooDesign handles rate limiting internally using variationIndex * delay
+    const generateItem = async (i: number) => {
+        if (permissionDenied) return;
+
         try {
             const result = await generateTattooDesign({
                 concept,
@@ -154,6 +158,8 @@ const App: React.FC = () => {
                 variationIndex: i,
                 isProjectItem: mode === ProjectMode.PROJECT
             });
+
+            if (permissionDenied) return;
 
             const design: DesignData = {
                 id: Date.now().toString() + i,
@@ -165,26 +171,45 @@ const App: React.FC = () => {
                 createdAt: Date.now()
             };
             
+            // Functional update handles concurrency safely
             setPortfolioState(prev => ({ ...prev, designs: [...prev.designs, design] }));
             successCount++;
+
+            if (size > 1) {
+                setLoadingProgress(prev => prev ? { ...prev, current: prev.current + 1 } : undefined);
+            }
 
         } catch (err: any) {
             console.error(`Failed to generate item ${i+1}:`, err);
             
             if (err.message === "PERMISSION_DENIED") {
-                setLoading(false);
-                setLoadingProgress(undefined);
-                if (window.aistudio && window.aistudio.openSelectKey) {
-                    await window.aistudio.openSelectKey();
-                    alert("API Key updated. Please try again!");
-                } else {
-                    alert("Access Denied. Please check your API Key settings.");
+                if (!permissionDenied) {
+                    permissionDenied = true;
+                    setLoading(false);
+                    setLoadingProgress(undefined);
+                    if (window.aistudio && window.aistudio.openSelectKey) {
+                        await window.aistudio.openSelectKey();
+                        alert("API Key updated. Please try again!");
+                    } else {
+                        alert("Access Denied. Please check your API Key settings.");
+                    }
                 }
-                return; // Stop completely on permission error
+                return;
             }
-            // Continue loop for other errors (like transient server errors)
+            // Continue loop/promises for other errors (like transient server errors)
         }
+    };
+
+    // Execute requests in parallel.
+    // The internal delay in generateTattooDesign ensures we respect rate limits.
+    const promises = [];
+    for (let i = 0; i < size; i++) {
+        promises.push(generateItem(i));
     }
+
+    await Promise.all(promises);
+
+    if (permissionDenied) return;
 
     setLoading(false);
     setLoadingProgress(undefined);
