@@ -90,7 +90,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
 
           {/* Smart Input Guidance */}
           <div className="flex items-center justify-between px-1">
-             <p id="concept-helper" className={`text-xs font-medium transition-colors ${!concept ? 'text-ink-400' : concept.length < 10 ? 'text-blue-400' : 'text-green-400'}`}>
+             <p id="concept-helper" aria-live="polite" className={`text-xs font-medium transition-colors ${!concept ? 'text-ink-400' : concept.length < 10 ? 'text-blue-400' : 'text-green-400'}`}>
                 {!concept && "Describe the subject, style, and mood."}
                 {concept && concept.length < 10 && "Tip: Add more details for better results..."}
                 {concept && concept.length >= 10 && "✨ Great description! Ready to generate."}
