@@ -43,6 +43,12 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
     onGenerate(concept, placement, style, size, mode);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
   return (
     <div className="bg-ink-800 rounded-xl shadow-2xl shadow-black border border-ink-700 overflow-hidden text-ink-50">
       
@@ -78,6 +84,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
                 type="text" 
                 value={concept}
                 onChange={(e) => setConcept(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder={mode === ProjectMode.PROJECT ? "e.g. Ocean theme sleeve with ships and kraken..." : "e.g. A roaring tiger, black and grey..."}
                 aria-describedby="concept-helper"
                 className="w-full px-6 py-5 rounded-lg bg-ink-900 border border-ink-600 focus:border-accent-gold focus:ring-1 focus:ring-accent-gold outline-none transition-all text-lg font-medium text-white placeholder:text-ink-600"
@@ -215,7 +222,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
         </div>
 
         {/* Action Button */}
-        <Tooltip content={!concept ? "Enter a concept first" : "Start Generation"} className="w-full">
+        <Tooltip content={!concept ? "Enter a concept first" : "Start Generation (⌘+Enter)"} className="w-full">
           <button
             onClick={handleSubmit}
             disabled={!concept || isLoading}
