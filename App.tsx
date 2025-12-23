@@ -269,7 +269,7 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Tooltip content="Reset Studio" position="bottom">
-                  <button type="button" className="flex items-center gap-2 cursor-pointer group" onClick={handleReset}>
+                  <button type="button" aria-label="Reset Studio" className="flex items-center gap-2 cursor-pointer group" onClick={handleReset}>
                       <div className="w-8 h-8 bg-accent-gold text-black rounded flex items-center justify-center shadow-lg shadow-accent-gold/20 transform group-hover:rotate-180 transition-transform duration-500">
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                       </div>
@@ -296,6 +296,7 @@ const App: React.FC = () => {
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setView(view === 'home' ? 'settings' : 'home')}
+                aria-label={view === 'home' ? "Open Settings" : "Open Studio"}
                 className="md:hidden p-2 text-ink-400 hover:bg-ink-800 rounded-full"
               >
                   {view === 'home' ? <SettingsIcon className="w-5 h-5" /> : <Home className="w-5 h-5" />}
@@ -303,6 +304,7 @@ const App: React.FC = () => {
 
               <button 
                   onClick={() => tier === AppTier.FREE && setShowUpgradeModal(true)}
+                  aria-label="Upgrade to Pro"
                   className={`px-4 py-2 rounded font-bold text-xs transition-all transform hover:scale-105 active:scale-95 uppercase tracking-widest ${
                       tier === AppTier.PRO 
                       ? 'bg-ink-800 text-accent-gold border border-accent-gold/50 cursor-default'
