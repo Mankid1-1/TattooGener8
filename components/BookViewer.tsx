@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { DesignData, AppTier, PaperSize, BodyPlacement, ProjectMode } from '../types';
 import { Printer, Download, RefreshCw, Edit3, X, ZoomIn, Lock, Layers, Palette, FileSignature, Info } from 'lucide-react';
@@ -44,6 +43,11 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    // 🛡️ SENTINEL: Security Fix
+    // Escape ALL user-controlled inputs before writing to the document.
+    // This includes IDs (which can be spoofed via localStorage) and URLs.
+    // While URLs are typically data URIs here, escaping prevents attribute injection.
+
     printWindow.document.write(`
       <html>
         <head>
@@ -69,9 +73,9 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
           </div>
           ${list.map(p => `
             <div class="page">
-              <img src="${p.modifiedUrl || p.originalUrl}" />
+              <img src="${escapeHtml(p.modifiedUrl || p.originalUrl || '')}" />
               <div class="meta">
-                 TATTOOCRATE REF: ${p.id} | CONCEPT: ${escapeHtml(concept.toUpperCase())}
+                 TATTOOCRATE REF: ${escapeHtml(p.id)} | CONCEPT: ${escapeHtml(concept.toUpperCase())}
               </div>
             </div>
           `).join('')}
