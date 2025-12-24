@@ -2,9 +2,6 @@
 import React, { useState } from 'react';
 import { DesignData, AppTier, PaperSize, BodyPlacement, ProjectMode } from '../types';
 import { Printer, Download, RefreshCw, Edit3, X, ZoomIn, Lock, Layers, Palette, FileSignature, Info } from 'lucide-react';
-import { CreativeEditor } from './CreativeEditor';
-import { PlacementCanvas } from './PlacementCanvas';
-import { ClientWaiverModal } from './ClientWaiverModal';
 import { Tooltip } from './Tooltip';
 import { DesignGridItem } from './DesignGridItem';
 import { escapeHtml } from '../utils/security';
@@ -98,6 +95,11 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
       await onRegeneratePage(id);
       setRegeneratingId(null);
   };
+
+  // Lazy load heavy interactive components to improve initial render
+  const CreativeEditor = React.useMemo(() => React.lazy(() => import('./CreativeEditor').then(module => ({ default: module.CreativeEditor }))), []);
+  const PlacementCanvas = React.useMemo(() => React.lazy(() => import('./PlacementCanvas').then(module => ({ default: module.PlacementCanvas }))), []);
+  const ClientWaiverModal = React.useMemo(() => React.lazy(() => import('./ClientWaiverModal').then(module => ({ default: module.ClientWaiverModal }))), []);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -258,40 +260,46 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
 
       {/* Editor Overlay */}
       {isEditorOpen && focusedDesign && (
-          <CreativeEditor 
-            pageId={focusedDesign.id}
-            baseImage={focusedDesign.modifiedUrl || focusedDesign.originalUrl}
-            onClose={() => setIsEditorOpen(false)}
-            onSave={(newUrl) => {
-                onUpdatePage(focusedDesign.id, newUrl);
-                setIsEditorOpen(false);
-            }}
-          />
+          <React.Suspense fallback={<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80"><div className="animate-spin rounded-full h-12 w-12 border-4 border-accent-gold border-t-transparent"></div></div>}>
+            <CreativeEditor
+                pageId={focusedDesign.id}
+                baseImage={focusedDesign.modifiedUrl || focusedDesign.originalUrl}
+                onClose={() => setIsEditorOpen(false)}
+                onSave={(newUrl) => {
+                    onUpdatePage(focusedDesign.id, newUrl);
+                    setIsEditorOpen(false);
+                }}
+            />
+          </React.Suspense>
       )}
 
       {/* Sleeve Builder Overlay */}
       {isBuilderOpen && mode === ProjectMode.PROJECT && (
-          <PlacementCanvas 
-            placement={placement}
-            availableDesigns={designs}
-            onSave={(layers) => {
-                alert("Sleeve saved to project file.");
-                setIsBuilderOpen(false);
-            }}
-            onClose={() => setIsBuilderOpen(false)}
-          />
+          <React.Suspense fallback={<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80"><div className="animate-spin rounded-full h-12 w-12 border-4 border-accent-gold border-t-transparent"></div></div>}>
+            <PlacementCanvas
+                placement={placement}
+                availableDesigns={designs}
+                onSave={(layers) => {
+                    alert("Sleeve saved to project file.");
+                    setIsBuilderOpen(false);
+                }}
+                onClose={() => setIsBuilderOpen(false)}
+            />
+          </React.Suspense>
       )}
 
       {/* Intake Waiver Overlay */}
       {isWaiverOpen && (
-          <ClientWaiverModal 
-             onSign={(waiver) => {
-                 console.log("Waiver Signed:", waiver);
-                 setIsWaiverOpen(false);
-                 alert(`Waiver signed by ${waiver.clientName}`);
-             }}
-             onClose={() => setIsWaiverOpen(false)}
-          />
+          <React.Suspense fallback={<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80"><div className="animate-spin rounded-full h-12 w-12 border-4 border-accent-gold border-t-transparent"></div></div>}>
+            <ClientWaiverModal
+                onSign={(waiver) => {
+                    console.log("Waiver Signed:", waiver);
+                    setIsWaiverOpen(false);
+                    alert(`Waiver signed by ${waiver.clientName}`);
+                }}
+                onClose={() => setIsWaiverOpen(false)}
+            />
+          </React.Suspense>
       )}
     </div>
   );
