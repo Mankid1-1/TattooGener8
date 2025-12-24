@@ -115,6 +115,7 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
               <button 
                 onClick={() => setIsWaiverOpen(true)}
                 className="flex items-center gap-2 bg-ink-900 text-ink-300 hover:text-white px-4 py-3 rounded-lg font-bold border border-ink-700 hover:border-ink-500 transition-colors"
+                aria-label="Sign Intake Form"
               >
                 <FileSignature className="w-4 h-4" />
                 <span className="hidden md:inline">INTAKE FORM</span>
@@ -167,6 +168,7 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
                   <button 
                       onClick={() => setFocusedId(null)}
                       className="p-2 bg-white/10 text-white hover:bg-white/20 rounded-full transition-colors"
+                      aria-label="Close design view"
                   >
                       <X className="w-6 h-6" />
                   </button>
