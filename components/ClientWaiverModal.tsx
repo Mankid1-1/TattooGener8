@@ -90,6 +90,7 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                         <label className="block text-xs font-bold uppercase mb-1">Client Name</label>
                         <input 
                             type="text" 
+                            maxLength={50}
                             className="w-full border-b border-black bg-gray-50 px-2 py-1 outline-none focus:bg-yellow-50"
                             placeholder="Full Legal Name"
                             value={formData.name}
@@ -153,6 +154,7 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                         <PenTool className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input 
                             type="text" 
+                            maxLength={50}
                             className="w-full border-2 border-gray-300 rounded p-3 pl-10 font-script text-2xl focus:border-black outline-none"
                             placeholder="Sign here..."
                             value={formData.signature}

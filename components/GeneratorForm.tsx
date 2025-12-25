@@ -85,6 +85,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
                 value={concept}
                 onChange={(e) => setConcept(e.target.value)}
                 onKeyDown={handleKeyDown}
+                maxLength={1000}
                 placeholder={mode === ProjectMode.PROJECT ? "e.g. Ocean theme sleeve with ships and kraken..." : "e.g. A roaring tiger, black and grey..."}
                 aria-describedby="concept-helper"
                 className="w-full px-6 py-5 rounded-lg bg-ink-900 border border-ink-600 focus:border-accent-gold focus:ring-1 focus:ring-accent-gold outline-none transition-all text-lg font-medium text-white placeholder:text-ink-600"
