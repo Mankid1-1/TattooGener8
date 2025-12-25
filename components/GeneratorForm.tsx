@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { BodyPlacement, AppTier, TattooStyle, CollectionSize, ProjectMode } from '../types';
-import { Sparkles, Zap, Lock, Layers, Palette } from 'lucide-react';
+import { Sparkles, Zap, Lock, Layers, Palette, X } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 
 interface GeneratorFormProps {
@@ -36,6 +36,8 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
   const [style, setStyle] = useState<TattooStyle>(TattooStyle.TRADITIONAL);
   const [mode, setMode] = useState<ProjectMode>(ProjectMode.SINGLE);
   const [projectSize, setProjectSize] = useState(4); // Default 4 items for project
+
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
     if (!concept) return;
@@ -80,6 +82,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
           <Tooltip content="Describe your tattoo idea" position="top" className="w-full">
             <div className="relative group w-full">
               <input 
+                ref={inputRef}
                 id="concept-input"
                 type="text" 
                 value={concept}
@@ -89,8 +92,22 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
                 aria-describedby="concept-helper"
                 className="w-full px-6 py-5 rounded-lg bg-ink-900 border border-ink-600 focus:border-accent-gold focus:ring-1 focus:ring-accent-gold outline-none transition-all text-lg font-medium text-white placeholder:text-ink-600"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-600 pointer-events-none group-focus-within:text-accent-gold transition-colors">
-                <Sparkles className="w-5 h-5" />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                {concept ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConcept('');
+                      inputRef.current?.focus();
+                    }}
+                    className="p-1 text-ink-400 hover:text-white hover:bg-ink-800 rounded-full transition-colors pointer-events-auto"
+                    aria-label="Clear concept"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <Sparkles className="w-5 h-5 text-ink-600 group-focus-within:text-accent-gold transition-colors" />
+                )}
               </div>
             </div>
           </Tooltip>
