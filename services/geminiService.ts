@@ -5,8 +5,17 @@ import { AppTier, GenerationParams, BodyPlacement, TattooStyle } from "../types"
 // Security Note: We use specific HarmCategory enums required by the GoogleGenAI SDK to ensure
 // safety settings are correctly applied. Incorrect strings are ignored or cause type errors.
 
+let genAIInstance: GoogleGenAI | null = null;
+
+const getGenAIClient = () => {
+  if (!genAIInstance) {
+    genAIInstance = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  }
+  return genAIInstance;
+};
+
 export const generateTattooDesign = async (params: GenerationParams): Promise<{ imageUrl: string; prompt: string }> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getGenAIClient();
   
   const { concept, placement, style, tier, variationIndex = 0, isProjectItem = false } = params;
 
