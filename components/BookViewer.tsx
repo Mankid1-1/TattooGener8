@@ -41,9 +41,11 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
     if (!printWindow) return;
 
     // 🛡️ SENTINEL: Security Fix
-    // Escape ALL user-controlled inputs before writing to the document.
-    // This includes IDs (which can be spoofed via localStorage) and URLs.
-    // While URLs are typically data URIs here, escaping prevents attribute injection.
+    // Prevent the new window from accessing the opener (Reverse Tabnabbing protection).
+    // Although we write to it, cutting the link is a defense-in-depth best practice.
+    printWindow.opener = null;
+
+    // Note: Inputs below (concept, id, urls) are escaped using escapeHtml to prevent XSS.
 
     printWindow.document.write(`
       <html>
