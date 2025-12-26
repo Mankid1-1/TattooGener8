@@ -77,7 +77,7 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                 <h2 className="text-2xl font-serif font-bold uppercase tracking-widest">Client Intake & Consent</h2>
                 <p className="text-xs font-mono mt-1 text-gray-600">FORM TC-2024-ENG • TATTOOCRATE STUDIO</p>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full"><X className="w-6 h-6" /></button>
+            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full" aria-label="Close waiver form"><X className="w-6 h-6" /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8 font-sans">
@@ -87,8 +87,9 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                 <h3 className="font-bold border-b border-gray-300 pb-1 uppercase text-sm">1. Client Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-xs font-bold uppercase mb-1">Client Name</label>
+                        <label htmlFor="waiver-name" className="block text-xs font-bold uppercase mb-1">Client Name</label>
                         <input 
+                            id="waiver-name"
                             type="text" 
                             className="w-full border-b border-black bg-gray-50 px-2 py-1 outline-none focus:bg-yellow-50"
                             placeholder="Full Legal Name"
@@ -97,8 +98,9 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold uppercase mb-1">Date of Birth</label>
+                        <label htmlFor="waiver-dob" className="block text-xs font-bold uppercase mb-1">Date of Birth</label>
                         <input 
+                            id="waiver-dob"
                             type="date" 
                             className="w-full border-b border-black bg-gray-50 px-2 py-1 outline-none focus:bg-yellow-50"
                             value={formData.dob}
@@ -148,10 +150,11 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                 </div>
 
                 <div className="mt-4">
-                     <label className="block text-xs font-bold uppercase mb-2">Client Signature (Type Full Name)</label>
+                     <label htmlFor="waiver-signature" className="block text-xs font-bold uppercase mb-2">Client Signature (Type Full Name)</label>
                      <div className="relative">
                         <PenTool className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input 
+                            id="waiver-signature"
                             type="text" 
                             className="w-full border-2 border-gray-300 rounded p-3 pl-10 font-script text-2xl focus:border-black outline-none"
                             placeholder="Sign here..."
