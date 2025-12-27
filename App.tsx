@@ -70,14 +70,20 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-      if (portfolioState.designs.length > 0) {
-          try {
-            localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioState));
-          } catch (e) {
-            console.error("Storage full or quota exceeded", e);
-            // Optional: alert user or trim old data
+      // ⚡ Bolt: Debounce storage to prevent blocking main thread with heavy JSON serialization
+      // during rapid state updates (e.g. parallel generation of multiple base64 images).
+      const timeoutId = setTimeout(() => {
+          if (portfolioState.designs.length > 0) {
+              try {
+                localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioState));
+              } catch (e) {
+                console.error("Storage full or quota exceeded", e);
+                // Optional: alert user or trim old data
+              }
           }
-      }
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
   }, [portfolioState]);
 
   useEffect(() => {
