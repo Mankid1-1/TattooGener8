@@ -1,14 +1,3 @@
-## 2025-02-14 - Google GenAI Safety Types
-**Vulnerability:** Type mismatches in `safetySettings` configuration for `@google/genai` SDK.
-**Learning:** The SDK enforces strict Enum usage for `HarmCategory` and `HarmBlockThreshold`. Using string literals (e.g. `'HARM_CATEGORY_HARASSMENT'`) causes TypeScript errors and may lead to settings being ignored at runtime if the SDK changes internal string mappings.
-**Prevention:** Always import and use `HarmCategory` and `HarmBlockThreshold` Enums from the SDK instead of hardcoding strings. This ensures type safety and correct configuration application.
+# Sentinel Journal
 
-## 2025-02-14 - Prompt Injection Defense
-**Vulnerability:** Unbounded user input in AI prompts allowing potential DoS or prompt injection.
-**Learning:** Directly interpolating user input into an LLM prompt without length limits or sanitization exposes the system to token exhaustion attacks and prompt injection.
-**Prevention:** Implemented strict input truncation (1000 chars) and whitelist-based character sanitization (alphanumeric + basic punctuation) before prompt construction.
-
-## 2025-02-14 - DOM-Based XSS in Print Functionality
-**Vulnerability:** Reflected XSS vulnerability in `BookViewer.tsx` where user input (`concept`) was interpolated directly into `document.write()` for generating a print window.
-**Learning:** Even in client-side only apps, constructing HTML strings with user input for new windows/iframes bypasses React's built-in escaping mechanisms.
-**Prevention:** Created `utils/security.ts` with `escapeHtml` and mandated its use for any raw HTML string construction. Always sanitize data crossing the boundary from React state to raw DOM APIs.
+This journal documents CRITICAL security learnings and patterns.
