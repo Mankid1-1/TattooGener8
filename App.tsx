@@ -1,4 +1,6 @@
 
+import React, { useState, useEffect, useCallback } from 'react';
+import { BodyPlacement, AppTier, TattooStyle, CollectionSize, DesignData, PortfolioState, AppView, AppSettings, PaperSize, ProjectMode, ClientWaiver } from './types';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BodyPlacement, AppTier, TattooStyle, CollectionSize, DesignData, PortfolioState, AppView, AppSettings, PaperSize, ProjectMode } from './types';
 import { generateTattooDesign } from './services/geminiService';
@@ -301,6 +303,10 @@ const App: React.FC = () => {
       }));
   };
 
+  const handleWaiverUpdate = (waiver: ClientWaiver) => {
+      setPortfolioState(prev => ({ ...prev, waiver }));
+  };
+
   const handleShowUpgrade = useCallback(() => setShowUpgradeModal(true), []);
 
   return (
@@ -401,9 +407,11 @@ const App: React.FC = () => {
                             paperSize={appSettings.paperSize}
                             mode={portfolioState.mode}
                             placement={portfolioState.placement}
+                            waiver={portfolioState.waiver}
                             onRegeneratePage={handleRegenerateSinglePage}
                             onUpdatePage={handleUpdatePage}
                             onUpgrade={() => setShowUpgradeModal(true)}
+                            onWaiverUpdate={handleWaiverUpdate}
                         />
                     </React.Suspense>
                 </div>
