@@ -71,6 +71,19 @@ const App: React.FC = () => {
     }
   };
 
+ bolt-debounce-persistence-6490698314125196575
+  // Ref to hold latest state for emergency save on close
+  const portfolioStateRef = React.useRef(portfolioState);
+  useEffect(() => {
+      portfolioStateRef.current = portfolioState;
+  }, [portfolioState]);
+
+  // Save on unload to prevent data loss from debounce delay
+  useEffect(() => {
+      const handleBeforeUnload = () => {
+          if (portfolioStateRef.current.designs.length > 0) {
+             localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioStateRef.current));
+
   const lastQuotaAlert = useRef(0);
 
   useEffect(() => {
@@ -118,8 +131,27 @@ const App: React.FC = () => {
             } else {
                 console.error("Failed to save portfolio:", e);
             }
+main
           }
-      }
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  useEffect(() => {
+      // Debounce persistence to prevent blocking main thread with heavy JSON serialization
+      // during rapid state updates (e.g. generating multiple designs).
+      const timeoutId = setTimeout(() => {
+          if (portfolioState.designs.length > 0) {
+              try {
+                localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioState));
+              } catch (e) {
+                console.error("Storage full or quota exceeded", e);
+              }
+          }
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
   }, [portfolioState]);
 
   useEffect(() => {
