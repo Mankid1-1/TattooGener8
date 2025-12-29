@@ -55,16 +55,24 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
     <div className="bg-ink-800 rounded-xl shadow-2xl shadow-black border border-ink-700 overflow-hidden text-ink-50">
       
       {/* Mode Tabs */}
-      <div className="flex border-b border-ink-700">
+      <div role="tablist" aria-label="Project Mode" className="flex border-b border-ink-700">
           <button 
+             role="tab"
+             aria-selected={mode === ProjectMode.SINGLE}
+             id="tab-single"
+             tabIndex={mode === ProjectMode.SINGLE ? 0 : -1}
              onClick={() => setMode(ProjectMode.SINGLE)}
-             className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${mode === ProjectMode.SINGLE ? 'bg-ink-800 text-accent-gold border-b-2 border-accent-gold' : 'bg-ink-900 text-ink-500 hover:text-white'}`}
+             className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors outline-none focus-visible:bg-ink-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-gold ${mode === ProjectMode.SINGLE ? 'bg-ink-800 text-accent-gold border-b-2 border-accent-gold' : 'bg-ink-900 text-ink-500 hover:text-white'}`}
           >
               <Zap className="w-4 h-4" /> Single Design
           </button>
           <button 
+             role="tab"
+             aria-selected={mode === ProjectMode.PROJECT}
+             id="tab-project"
+             tabIndex={mode === ProjectMode.PROJECT ? 0 : -1}
              onClick={() => setMode(ProjectMode.PROJECT)}
-             className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${mode === ProjectMode.PROJECT ? 'bg-ink-800 text-accent-gold border-b-2 border-accent-gold' : 'bg-ink-900 text-ink-500 hover:text-white'}`}
+             className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors outline-none focus-visible:bg-ink-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-gold ${mode === ProjectMode.PROJECT ? 'bg-ink-800 text-accent-gold border-b-2 border-accent-gold' : 'bg-ink-900 text-ink-500 hover:text-white'}`}
           >
               <Layers className="w-4 h-4" /> Sleeve Project
           </button>
