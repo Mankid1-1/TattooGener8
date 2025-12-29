@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { BodyPlacement, AppTier, TattooStyle, CollectionSize, DesignData, PortfolioState, AppView, AppSettings, PaperSize, ProjectMode, ClientWaiver } from './types';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BodyPlacement, AppTier, TattooStyle, CollectionSize, DesignData, PortfolioState, AppView, AppSettings, PaperSize, ProjectMode } from './types';
 import { generateTattooDesign } from './services/geminiService';
 import { purchaseSubscription, restorePurchases, setPurchaseFlag } from './services/storeService';
@@ -69,6 +71,7 @@ const App: React.FC = () => {
     }
   };
 
+ bolt-debounce-persistence-6490698314125196575
   // Ref to hold latest state for emergency save on close
   const portfolioStateRef = React.useRef(portfolioState);
   useEffect(() => {
@@ -80,6 +83,55 @@ const App: React.FC = () => {
       const handleBeforeUnload = () => {
           if (portfolioStateRef.current.designs.length > 0) {
              localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioStateRef.current));
+
+  const lastQuotaAlert = useRef(0);
+
+  useEffect(() => {
+      if (portfolioState.designs.length > 0) {
+          try {
+            localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioState));
+          } catch (e: any) {
+            if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                console.warn("Storage quota exceeded. Attempting to trim old data.");
+
+                // Iteratively remove oldest designs until it fits
+                let trimmedDesigns = [...portfolioState.designs];
+                let saved = false;
+
+                while (trimmedDesigns.length > 0 && !saved) {
+                    trimmedDesigns.shift(); // Remove oldest
+                    const newState = { ...portfolioState, designs: trimmedDesigns };
+                    try {
+                        localStorage.setItem('tc_portfolio_state', JSON.stringify(newState));
+                        saved = true;
+
+                        // Update state to match persistence so we don't try saving the big one again next render
+                        setPortfolioState(newState);
+
+                        // Throttle alert to avoid spamming
+                        const now = Date.now();
+                        if (now - lastQuotaAlert.current > 30000) {
+                            alert("Storage limit reached. Oldest designs were automatically removed to make space.");
+                            lastQuotaAlert.current = now;
+                        }
+                    } catch (retryError) {
+                        // Continue loop
+                    }
+                }
+
+                if (!saved && trimmedDesigns.length === 0) {
+                     console.error("Storage full. Could not save even after clearing designs.");
+                     // This implies other keys are taking up all space or quota is 0.
+                     const now = Date.now();
+                     if (now - lastQuotaAlert.current > 30000) {
+                         alert("Storage completely full. Unable to save your work.");
+                         lastQuotaAlert.current = now;
+                     }
+                }
+            } else {
+                console.error("Failed to save portfolio:", e);
+            }
+main
           }
       };
       window.addEventListener('beforeunload', handleBeforeUnload);
@@ -283,6 +335,10 @@ const App: React.FC = () => {
       }));
   };
 
+  const handleWaiverUpdate = (waiver: ClientWaiver) => {
+      setPortfolioState(prev => ({ ...prev, waiver }));
+  };
+
   const handleShowUpgrade = useCallback(() => setShowUpgradeModal(true), []);
 
   return (
@@ -383,9 +439,11 @@ const App: React.FC = () => {
                             paperSize={appSettings.paperSize}
                             mode={portfolioState.mode}
                             placement={portfolioState.placement}
+                            waiver={portfolioState.waiver}
                             onRegeneratePage={handleRegenerateSinglePage}
                             onUpdatePage={handleUpdatePage}
                             onUpgrade={() => setShowUpgradeModal(true)}
+                            onWaiverUpdate={handleWaiverUpdate}
                         />
                     </React.Suspense>
                 </div>
