@@ -70,7 +70,7 @@ const App: React.FC = () => {
   };
 
   // Ref to hold latest state for emergency save on close
-  const portfolioStateRef = React.useRef(portfolioState);
+  const portfolioStateRef = useRef(portfolioState);
   useEffect(() => {
       portfolioStateRef.current = portfolioState;
   }, [portfolioState]);
@@ -79,7 +79,18 @@ const App: React.FC = () => {
   useEffect(() => {
       const handleBeforeUnload = () => {
           if (portfolioStateRef.current.designs.length > 0) {
+ palette-a11y-fix-app-6281512874906153979
+             try {
+                localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioStateRef.current));
+             } catch (e) {
+                console.error("Failed to save on unload", e);
+             }
+
              localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioStateRef.current));
+ palette-skip-link-nav-16199029736191852184
+
+ sentinel/input-validation-fix-10639127908878875387
+ main
           }
       };
       window.addEventListener('beforeunload', handleBeforeUnload);
@@ -133,9 +144,22 @@ const App: React.FC = () => {
             } else {
                 console.error("Failed to save portfolio:", e);
             }
+ palette-skip-link-nav-16199029736191852184
           }
       }
   }, [portfolioState]); // Added dependency to trigger the quota check/save
+
+
+ main
+ main
+          }
+      }
+  }, [portfolioState]); // Added dependency to trigger on change
+
+  const lastQuotaAlert = useRef(0);
+
+  const lastQuotaAlert = useRef(0);
+ main
 
   useEffect(() => {
       // Debounce persistence to prevent blocking main thread with heavy JSON serialization
@@ -147,6 +171,64 @@ const App: React.FC = () => {
       // Wait, the original code had a debounce useEffect AND the quota logic.
       // Let's look at the original structure in memory/context.
       // The quota logic was likely the intended replacement or enhancement for the simple debounce.
+      const timeoutId = setTimeout(() => {
+          if (portfolioState.designs.length > 0) {
+              try {
+                localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioState));
+              } catch (e: any) {
+                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                    console.warn("Storage quota exceeded. Attempting to trim old data.");
+
+                    // Iteratively remove oldest designs until it fits
+                    let trimmedDesigns = [...portfolioState.designs];
+                    let saved = false;
+
+                    while (trimmedDesigns.length > 0 && !saved) {
+                        trimmedDesigns.shift(); // Remove oldest
+                        const newState = { ...portfolioState, designs: trimmedDesigns };
+                        try {
+                            localStorage.setItem('tc_portfolio_state', JSON.stringify(newState));
+                            saved = true;
+
+                            // Update state to match persistence so we don't try saving the big one again next render
+                            setPortfolioState(newState);
+
+                            // Throttle alert to avoid spamming
+                            const now = Date.now();
+                            if (now - lastQuotaAlert.current > 30000) {
+                                alert("Storage limit reached. Oldest designs were automatically removed to make space.");
+                                lastQuotaAlert.current = now;
+                            }
+                        } catch (retryError) {
+                            // Continue loop
+                        }
+                    }
+
+                    if (!saved && trimmedDesigns.length === 0) {
+ palette-a11y-fix-app-6281512874906153979
+                        console.error("Storage full. Could not save even after clearing designs.");
+                        // This implies other keys are taking up all space or quota is 0.
+                        const now = Date.now();
+                        if (now - lastQuotaAlert.current > 30000) {
+                            alert("Storage completely full. Unable to save your work.");
+                            lastQuotaAlert.current = now;
+                        }
+
+                         console.error("Storage full. Could not save even after clearing designs.");
+                         // This implies other keys are taking up all space or quota is 0.
+                         const now = Date.now();
+                         if (now - lastQuotaAlert.current > 30000) {
+                             alert("Storage completely full. Unable to save your work.");
+                             lastQuotaAlert.current = now;
+                         }
+ main
+                    }
+                } else {
+                    console.error("Failed to save portfolio:", e);
+                }
+              }
+          }
+      }, 1000);
 
       // For now, I will keep the quota logic as the primary saver since it handles errors.
       // I will REMOVE the simple debounce useEffect to avoid double saving/race conditions.
@@ -291,7 +373,7 @@ const App: React.FC = () => {
     }
   }, [tier]);
 
-  const handleRegenerateSinglePage = async (pageId: string) => {
+  const handleRegenerateSinglePage = useCallback(async (pageId: string) => {
       const pageIndex = portfolioState.designs.findIndex(p => p.id === pageId);
       if (pageIndex === -1) return;
 
@@ -322,18 +404,18 @@ const App: React.FC = () => {
           console.error("Failed to regenerate", e);
           alert("Failed to regenerate design.");
       }
-  };
+  }, [portfolioState.designs, portfolioState.concept, portfolioState.placement, portfolioState.style, portfolioState.mode, tier]);
 
-  const handleUpdatePage = (pageId: string, newUrl: string) => {
+  const handleUpdatePage = useCallback((pageId: string, newUrl: string) => {
       setPortfolioState(prev => ({
           ...prev,
           designs: prev.designs.map(p => p.id === pageId ? { ...p, modifiedUrl: newUrl } : p)
       }));
-  };
+  }, []);
 
-  const handleWaiverUpdate = (waiver: ClientWaiver) => {
+  const handleWaiverUpdate = useCallback((waiver: ClientWaiver) => {
       setPortfolioState(prev => ({ ...prev, waiver }));
-  };
+  }, []);
 
   const handleShowUpgrade = useCallback(() => setShowUpgradeModal(true), []);
 
