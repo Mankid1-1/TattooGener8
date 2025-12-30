@@ -258,7 +258,7 @@ export const CreativeEditor: React.FC<CreativeEditorProps> = ({ pageId, baseImag
         {/* Header */}
         <div className="flex justify-between items-center p-4 bg-ink-900 border-b border-ink-800">
             <Tooltip content="Close without saving" position="bottom">
-              <button onClick={onClose} className="p-2 hover:bg-ink-800 rounded-full"><X /></button>
+              <button onClick={onClose} className="p-2 hover:bg-ink-800 rounded-full" aria-label="Close without saving"><X /></button>
             </Tooltip>
             <h3 className="font-bold font-display tracking-widest uppercase">Design Studio</h3>
             <Tooltip content="Commit Changes">
@@ -318,7 +318,7 @@ export const CreativeEditor: React.FC<CreativeEditorProps> = ({ pageId, baseImag
                 {tool === 'motif' && (
                     <div className="flex gap-4 overflow-x-auto pb-2 px-2 scrollbar-hide">
                         {MOTIFS.map(s => (
-                            <button key={s} onClick={() => addMotif(s)} className="text-2xl hover:scale-125 transition-transform p-1">{s}</button>
+                            <button key={s} onClick={() => addMotif(s)} className="text-2xl hover:scale-125 transition-transform p-1" aria-label={`Add motif ${s}`}>{s}</button>
                         ))}
                     </div>
                 )}
@@ -330,6 +330,7 @@ export const CreativeEditor: React.FC<CreativeEditorProps> = ({ pageId, baseImag
                             onChange={e => setTextInput(e.target.value)} 
                             className="flex-1 bg-ink-800 border border-ink-600 rounded px-4 py-2 outline-none focus:border-accent-gold text-white"
                             placeholder="Enter text..."
+                            aria-label="Text to add"
                         />
                         <button onClick={addText} className="bg-accent-gold text-black px-4 rounded font-bold uppercase text-xs">Add</button>
                     </div>

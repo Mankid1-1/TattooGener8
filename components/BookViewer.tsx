@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { DesignData, AppTier, PaperSize, BodyPlacement, ProjectMode } from '../types';
+import { DesignData, AppTier, PaperSize, BodyPlacement, ProjectMode, ClientWaiver } from '../types';
 import { Printer, Download, RefreshCw, Edit3, X, ZoomIn, Lock, Layers, Palette, FileSignature, Info } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import { DesignGridItem } from './DesignGridItem';
@@ -13,13 +13,15 @@ interface DesignViewerProps {
   paperSize: PaperSize;
   mode: ProjectMode;
   placement: BodyPlacement;
+  waiver?: ClientWaiver;
   onRegeneratePage: (id: string) => void;
   onUpdatePage: (id: string, newUrl: string) => void;
   onUpgrade: () => void;
+  onWaiverUpdate: (waiver: ClientWaiver) => void;
 }
 
-export const BookViewer: React.FC<DesignViewerProps> = ({ 
-  designs, concept, tier, paperSize, mode, placement, onRegeneratePage, onUpdatePage, onUpgrade 
+export const BookViewer: React.FC<DesignViewerProps> = React.memo(({
+  designs, concept, tier, paperSize, mode, placement, waiver, onRegeneratePage, onUpdatePage, onUpgrade, onWaiverUpdate
 }) => {
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -34,19 +36,30 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
   }, []);
 
   const handlePrint = (design?: DesignData) => {
-    // Before printing, check if waiver is signed? 
-    // In this app, we just allow printing, but maybe we should show a warning.
+    if (!waiver?.signed) {
+        alert("Please sign the client intake waiver before printing.");
+        setIsWaiverOpen(true);
+        return;
+    }
     const list = design ? [design] : designs;
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
     // 🛡️ SENTINEL: Security Fix
+ sentinel-security-fix-opener-17049638335984121760
     // Prevent Reverse Tabnabbing: Ensure the new window cannot access the opener
     printWindow.opener = null;
 
     // Escape ALL user-controlled inputs before writing to the document.
     // This includes IDs (which can be spoofed via localStorage) and URLs.
     // While URLs are typically data URIs here, escaping prevents attribute injection.
+
+    // Prevent the new window from accessing the opener (Reverse Tabnabbing protection).
+    // Although we write to it, cutting the link is a defense-in-depth best practice.
+    printWindow.opener = null;
+
+    // Note: Inputs below (concept, id, urls) are escaped using escapeHtml to prevent XSS.
+ main
 
     printWindow.document.write(`
       <html>
@@ -299,6 +312,7 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
                     console.log("Waiver Signed:", waiver);
                     setIsWaiverOpen(false);
                     alert(`Waiver signed by ${waiver.clientName}`);
+                    onWaiverUpdate(waiver);
                 }}
                 onClose={() => setIsWaiverOpen(false)}
             />
@@ -306,4 +320,4 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
       )}
     </div>
   );
-};
+});
