@@ -70,7 +70,7 @@ const App: React.FC = () => {
   };
 
   // Ref to hold latest state for emergency save on close
-  const portfolioStateRef = React.useRef(portfolioState);
+  const portfolioStateRef = useRef(portfolioState);
   useEffect(() => {
       portfolioStateRef.current = portfolioState;
   }, [portfolioState]);
@@ -79,6 +79,13 @@ const App: React.FC = () => {
   useEffect(() => {
       const handleBeforeUnload = () => {
           if (portfolioStateRef.current.designs.length > 0) {
+ palette-a11y-fix-app-6281512874906153979
+             try {
+                localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioStateRef.current));
+             } catch (e) {
+                console.error("Failed to save on unload", e);
+             }
+
              localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioStateRef.current));
  sentinel/input-validation-fix-10639127908878875387
           }
@@ -136,9 +143,12 @@ const App: React.FC = () => {
             }
 
  main
+ main
           }
       }
   }, [portfolioState]); // Added dependency to trigger on change
+
+  const lastQuotaAlert = useRef(0);
 
   const lastQuotaAlert = useRef(0);
 
@@ -179,6 +189,15 @@ const App: React.FC = () => {
                     }
 
                     if (!saved && trimmedDesigns.length === 0) {
+ palette-a11y-fix-app-6281512874906153979
+                        console.error("Storage full. Could not save even after clearing designs.");
+                        // This implies other keys are taking up all space or quota is 0.
+                        const now = Date.now();
+                        if (now - lastQuotaAlert.current > 30000) {
+                            alert("Storage completely full. Unable to save your work.");
+                            lastQuotaAlert.current = now;
+                        }
+
                          console.error("Storage full. Could not save even after clearing designs.");
                          // This implies other keys are taking up all space or quota is 0.
                          const now = Date.now();
@@ -186,6 +205,7 @@ const App: React.FC = () => {
                              alert("Storage completely full. Unable to save your work.");
                              lastQuotaAlert.current = now;
                          }
+ main
                     }
                 } else {
                     console.error("Failed to save portfolio:", e);
