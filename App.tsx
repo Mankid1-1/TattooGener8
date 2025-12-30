@@ -1,8 +1,6 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { BodyPlacement, AppTier, TattooStyle, CollectionSize, DesignData, PortfolioState, AppView, AppSettings, PaperSize, ProjectMode, ClientWaiver } from './types';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { BodyPlacement, AppTier, TattooStyle, CollectionSize, DesignData, PortfolioState, AppView, AppSettings, PaperSize, ProjectMode } from './types';
+import { BodyPlacement, AppTier, TattooStyle, CollectionSize, DesignData, PortfolioState, AppView, AppSettings, PaperSize, ProjectMode, ClientWaiver } from './types';
 import { generateTattooDesign } from './services/geminiService';
 import { purchaseSubscription, restorePurchases, setPurchaseFlag } from './services/storeService';
 import { LoadingOverlay } from './components/LoadingOverlay';
@@ -71,7 +69,6 @@ const App: React.FC = () => {
     }
   };
 
- bolt-debounce-persistence-6490698314125196575
   // Ref to hold latest state for emergency save on close
   const portfolioStateRef = React.useRef(portfolioState);
   useEffect(() => {
@@ -83,6 +80,11 @@ const App: React.FC = () => {
       const handleBeforeUnload = () => {
           if (portfolioStateRef.current.designs.length > 0) {
              localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioStateRef.current));
+          }
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
 
   const lastQuotaAlert = useRef(0);
 
@@ -131,12 +133,9 @@ const App: React.FC = () => {
             } else {
                 console.error("Failed to save portfolio:", e);
             }
-main
           }
-      };
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, []);
+      }
+  }, [portfolioState]); // Added dependency to trigger on change
 
   useEffect(() => {
       // Debounce persistence to prevent blocking main thread with heavy JSON serialization

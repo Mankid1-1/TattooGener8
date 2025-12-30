@@ -22,11 +22,12 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
   const isFormValid = formData.name && formData.dob && formData.signature.length > 2;
 
   // 🛡️ SENTINEL: Input Validation & Sanitization
-  // Block obviously dangerous characters commonly used in XSS (<, >) while allowing
-  // international names (accents, etc). React escapes output by default, so this is
-  // an extra layer of defense (Defense in Depth).
-  const hasDangerousChars = (text: string) => {
-      return /[<>]/.test(text);
+  // Use a strict allowlist to sanitize names, preventing XSS and injection attacks.
+  // Allows unicode letters (accents), spaces, dots, hyphens, and apostrophes.
+  // Replaces previous weak blocklist (Defense in Depth).
+  const isValidName = (text: string) => {
+      // \p{L} = Any Unicode Letter, \p{M} = Any Unicode Mark (accents)
+      return /^[\p{L}\p{M}\s.'-]+$/u.test(text);
   };
 
   const [error, setError] = useState<string | null>(null);
@@ -35,8 +36,8 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
     setError(null);
     if (!isFormValid) return;
 
-    if (hasDangerousChars(formData.name) || hasDangerousChars(formData.signature)) {
-        setError("Invalid characters detected. Please remove < or > symbols.");
+    if (!isValidName(formData.name) || !isValidName(formData.signature)) {
+        setError("Invalid characters. Please use only letters, spaces, hyphens, and apostrophes.");
         return;
     }
 
