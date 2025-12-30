@@ -20,7 +20,7 @@ interface DesignViewerProps {
   onWaiverUpdate: (waiver: ClientWaiver) => void;
 }
 
-export const BookViewer: React.FC<DesignViewerProps> = ({ 
+export const BookViewer: React.FC<DesignViewerProps> = React.memo(({
   designs, concept, tier, paperSize, mode, placement, waiver, onRegeneratePage, onUpdatePage, onUpgrade, onWaiverUpdate
 }) => {
   const [focusedId, setFocusedId] = useState<string | null>(null);
@@ -311,4 +311,4 @@ export const BookViewer: React.FC<DesignViewerProps> = ({
       )}
     </div>
   );
-};
+});
