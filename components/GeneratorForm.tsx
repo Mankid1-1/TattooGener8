@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { BodyPlacement, AppTier, TattooStyle, CollectionSize, ProjectMode } from '../types';
-import { Sparkles, Zap, Lock, Layers, Palette } from 'lucide-react';
+import { Sparkles, Zap, Lock, Layers, Palette, X } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 
 interface GeneratorFormProps {
@@ -37,6 +37,8 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
   const [mode, setMode] = useState<ProjectMode>(ProjectMode.SINGLE);
   const [projectSize, setProjectSize] = useState(4); // Default 4 items for project
 
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
   const handleSubmit = () => {
     if (!concept) return;
     const size = mode === ProjectMode.SINGLE ? 1 : projectSize;
@@ -53,16 +55,24 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
     <div className="bg-ink-800 rounded-xl shadow-2xl shadow-black border border-ink-700 overflow-hidden text-ink-50">
       
       {/* Mode Tabs */}
-      <div className="flex border-b border-ink-700">
+      <div role="tablist" aria-label="Project Mode" className="flex border-b border-ink-700">
           <button 
+             role="tab"
+             aria-selected={mode === ProjectMode.SINGLE}
+             id="tab-single"
+             tabIndex={mode === ProjectMode.SINGLE ? 0 : -1}
              onClick={() => setMode(ProjectMode.SINGLE)}
-             className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${mode === ProjectMode.SINGLE ? 'bg-ink-800 text-accent-gold border-b-2 border-accent-gold' : 'bg-ink-900 text-ink-500 hover:text-white'}`}
+             className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors outline-none focus-visible:bg-ink-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-gold ${mode === ProjectMode.SINGLE ? 'bg-ink-800 text-accent-gold border-b-2 border-accent-gold' : 'bg-ink-900 text-ink-500 hover:text-white'}`}
           >
               <Zap className="w-4 h-4" /> Single Design
           </button>
           <button 
+             role="tab"
+             aria-selected={mode === ProjectMode.PROJECT}
+             id="tab-project"
+             tabIndex={mode === ProjectMode.PROJECT ? 0 : -1}
              onClick={() => setMode(ProjectMode.PROJECT)}
-             className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${mode === ProjectMode.PROJECT ? 'bg-ink-800 text-accent-gold border-b-2 border-accent-gold' : 'bg-ink-900 text-ink-500 hover:text-white'}`}
+             className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors outline-none focus-visible:bg-ink-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-gold ${mode === ProjectMode.PROJECT ? 'bg-ink-800 text-accent-gold border-b-2 border-accent-gold' : 'bg-ink-900 text-ink-500 hover:text-white'}`}
           >
               <Layers className="w-4 h-4" /> Sleeve Project
           </button>
@@ -80,17 +90,33 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
           <Tooltip content="Describe your tattoo idea" position="top" className="w-full">
             <div className="relative group w-full">
               <input 
+                ref={inputRef}
                 id="concept-input"
                 type="text" 
                 value={concept}
                 onChange={(e) => setConcept(e.target.value)}
                 onKeyDown={handleKeyDown}
+                maxLength={1000}
                 placeholder={mode === ProjectMode.PROJECT ? "e.g. Ocean theme sleeve with ships and kraken..." : "e.g. A roaring tiger, black and grey..."}
                 aria-describedby="concept-helper"
                 className="w-full px-6 py-5 rounded-lg bg-ink-900 border border-ink-600 focus:border-accent-gold focus:ring-1 focus:ring-accent-gold outline-none transition-all text-lg font-medium text-white placeholder:text-ink-600"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-600 pointer-events-none group-focus-within:text-accent-gold transition-colors">
-                <Sparkles className="w-5 h-5" />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                {concept ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConcept('');
+                      inputRef.current?.focus();
+                    }}
+                    className="p-1 text-ink-400 hover:text-white hover:bg-ink-800 rounded-full transition-colors pointer-events-auto"
+                    aria-label="Clear concept"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <Sparkles className="w-5 h-5 text-ink-600 group-focus-within:text-accent-gold transition-colors" />
+                )}
               </div>
             </div>
           </Tooltip>

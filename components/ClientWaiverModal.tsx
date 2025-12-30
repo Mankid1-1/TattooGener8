@@ -22,11 +22,12 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
   const isFormValid = formData.name && formData.dob && formData.signature.length > 2;
 
   // 🛡️ SENTINEL: Input Validation & Sanitization
-  // Block obviously dangerous characters commonly used in XSS (<, >) while allowing
-  // international names (accents, etc). React escapes output by default, so this is
-  // an extra layer of defense (Defense in Depth).
-  const hasDangerousChars = (text: string) => {
-      return /[<>]/.test(text);
+  // Use a strict allowlist to sanitize names, preventing XSS and injection attacks.
+  // Allows unicode letters (accents), spaces, dots, hyphens, and apostrophes.
+  // Replaces previous weak blocklist (Defense in Depth).
+  const isValidName = (text: string) => {
+      // \p{L} = Any Unicode Letter, \p{M} = Any Unicode Mark (accents)
+      return /^[\p{L}\p{M}\s.'-]+$/u.test(text);
   };
 
   const [error, setError] = useState<string | null>(null);
@@ -35,8 +36,8 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
     setError(null);
     if (!isFormValid) return;
 
-    if (hasDangerousChars(formData.name) || hasDangerousChars(formData.signature)) {
-        setError("Invalid characters detected. Please remove < or > symbols.");
+    if (!isValidName(formData.name) || !isValidName(formData.signature)) {
+        setError("Invalid characters. Please use only letters, spaces, hyphens, and apostrophes.");
         return;
     }
 
@@ -77,7 +78,7 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                 <h2 className="text-2xl font-serif font-bold uppercase tracking-widest">Client Intake & Consent</h2>
                 <p className="text-xs font-mono mt-1 text-gray-600">FORM TC-2024-ENG • TATTOOCRATE STUDIO</p>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full"><X className="w-6 h-6" /></button>
+            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full" aria-label="Close waiver form"><X className="w-6 h-6" /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8 font-sans">
@@ -87,9 +88,11 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                 <h3 className="font-bold border-b border-gray-300 pb-1 uppercase text-sm">1. Client Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-xs font-bold uppercase mb-1">Client Name</label>
+                        <label htmlFor="waiver-name" className="block text-xs font-bold uppercase mb-1">Client Name</label>
                         <input 
+                            id="waiver-name"
                             type="text" 
+                            maxLength={50}
                             className="w-full border-b border-black bg-gray-50 px-2 py-1 outline-none focus:bg-yellow-50"
                             placeholder="Full Legal Name"
                             value={formData.name}
@@ -97,8 +100,9 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold uppercase mb-1">Date of Birth</label>
+                        <label htmlFor="waiver-dob" className="block text-xs font-bold uppercase mb-1">Date of Birth</label>
                         <input 
+                            id="waiver-dob"
                             type="date" 
                             className="w-full border-b border-black bg-gray-50 px-2 py-1 outline-none focus:bg-yellow-50"
                             value={formData.dob}
@@ -148,11 +152,13 @@ export const ClientWaiverModal: React.FC<ClientWaiverModalProps> = ({ onSign, on
                 </div>
 
                 <div className="mt-4">
-                     <label className="block text-xs font-bold uppercase mb-2">Client Signature (Type Full Name)</label>
+                     <label htmlFor="waiver-signature" className="block text-xs font-bold uppercase mb-2">Client Signature (Type Full Name)</label>
                      <div className="relative">
                         <PenTool className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input 
+                            id="waiver-signature"
                             type="text" 
+                            maxLength={50}
                             className="w-full border-2 border-gray-300 rounded p-3 pl-10 font-script text-2xl focus:border-black outline-none"
                             placeholder="Sign here..."
                             value={formData.signature}

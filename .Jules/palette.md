@@ -1,3 +1,4 @@
-## 2024-05-23 - Tooltip Accessibility
-**Learning:** Custom Tooltip components often don't propagate ARIA attributes to their children. Wrapping an icon-only button in a Tooltip doesn't automatically give it an accessible name.
-**Action:** Always verify if the Tooltip component applies `aria-label` or `aria-describedby` to the trigger. If not, explicitly add `aria-label` to the button element itself, even if a visual tooltip is present.
+## 2024-05-23 - Skip Link & Aria Current
+**Learning:** Adding a "Skip to content" link is a high-impact, low-effort accessibility win for keyboard users, especially on pages with sticky headers.
+**Action:** Always include a hidden, focusable `<a>` tag at the start of the `<body>` or root component that links to `#main-content` (ensure the target has `tabIndex={-1}` for focus management).
+**Learning:** Navigation buttons should use `aria-current="page"` to indicate the active state, rather than just relying on visual styling (like background color). This provides essential context to screen reader users.
