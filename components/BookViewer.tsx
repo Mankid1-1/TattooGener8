@@ -46,11 +46,21 @@ export const BookViewer: React.FC<DesignViewerProps> = React.memo(({
     if (!printWindow) return;
 
     // 🛡️ SENTINEL: Security Fix
+ sentinel-security-fix-opener-16921362980550427801
+    // Prevent Reverse Tabnabbing
+    printWindow.opener = null;
+
+    // 🛡️ SENTINEL: Security Fix
+    // Escape ALL user-controlled inputs before writing to the document.
+    // This includes IDs (which can be spoofed via localStorage) and URLs.
+    // While URLs are typically data URIs here, escaping prevents attribute injection.
+
     // Prevent the new window from accessing the opener (Reverse Tabnabbing protection).
     // Although we write to it, cutting the link is a defense-in-depth best practice.
     printWindow.opener = null;
 
     // Note: Inputs below (concept, id, urls) are escaped using escapeHtml to prevent XSS.
+ main
 
     printWindow.document.write(`
       <html>
