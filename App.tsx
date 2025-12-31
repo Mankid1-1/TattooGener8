@@ -96,6 +96,58 @@ const App: React.FC = () => {
   // Prevents blocking the main thread with heavy JSON serialization during rapid state updates
   // (e.g., when multiple generation promises resolve in parallel).
   useEffect(() => {
+ palette-a11y-fix-and-app-repair-12228557338062902343
+      if (portfolioState.designs.length > 0) {
+          try {
+            localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioState));
+          } catch (e: any) {
+            if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                console.warn("Storage quota exceeded. Attempting to trim old data.");
+
+                // Iteratively remove oldest designs until it fits
+                let trimmedDesigns = [...portfolioState.designs];
+                let saved = false;
+
+                while (trimmedDesigns.length > 0 && !saved) {
+                    trimmedDesigns.shift(); // Remove oldest
+                    const newState = { ...portfolioState, designs: trimmedDesigns };
+                    try {
+                        localStorage.setItem('tc_portfolio_state', JSON.stringify(newState));
+                        saved = true;
+
+                        // Update state to match persistence so we don't try saving the big one again next render
+                        setPortfolioState(newState);
+
+                        // Throttle alert to avoid spamming
+                        const now = Date.now();
+                        if (now - lastQuotaAlert.current > 30000) {
+                            alert("Storage limit reached. Oldest designs were automatically removed to make space.");
+                            lastQuotaAlert.current = now;
+                        }
+                    } catch (retryError) {
+                        // Continue loop
+                    }
+                }
+
+                if (!saved && trimmedDesigns.length === 0) {
+                     console.error("Storage full. Could not save even after clearing designs.");
+                     // This implies other keys are taking up all space or quota is 0.
+                     const now = Date.now();
+                     if (now - lastQuotaAlert.current > 30000) {
+                         alert("Storage completely full. Unable to save your work.");
+                         lastQuotaAlert.current = now;
+                     }
+                }
+            } else {
+                console.error("Failed to save portfolio:", e);
+            }
+          }
+      }
+  }, [portfolioState]); // Added dependency to trigger the quota check/save
+
+      // Debounce persistence removed in favor of direct robust save above
+
+
       const timeoutId = setTimeout(() => {
           if (portfolioState.designs.length > 0) {
               try {
@@ -149,6 +201,7 @@ const App: React.FC = () => {
   }, [portfolioState]);
 
   // Separate effect for settings persistence
+ main
   useEffect(() => {
       localStorage.setItem('tc_app_settings', JSON.stringify(appSettings));
   }, [appSettings]);
