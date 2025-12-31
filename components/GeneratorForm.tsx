@@ -164,6 +164,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
                 {Object.values(BodyPlacement).filter(p => mode === ProjectMode.SINGLE ? true : p !== BodyPlacement.PAPER).map((place) => (
                   <Tooltip key={place} content={`Select ${place}`} className="w-full h-full">
                     <button
+                      aria-label={`Select placement: ${place}`}
                       onClick={() => setPlacement(place)}
                       className={`w-full h-full px-3 py-3 rounded-lg text-xs font-bold border transition-all flex items-center justify-center gap-2 ${
                         placement === place 
@@ -194,6 +195,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
                     return (
                         <Tooltip key={s} content={isLocked ? "Upgrade for larger sleeves" : `${s} Design Elements`} className="w-full">
                         <button 
+                            aria-label={isLocked ? `Locked: ${s} items, upgrade to pro` : `${s} items`}
                             disabled={isLocked}
                             onClick={() => setProjectSize(s)}
                             className={`w-full relative flex flex-col items-center justify-center p-3 rounded-lg border transition-all ${

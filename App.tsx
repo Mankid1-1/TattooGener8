@@ -79,18 +79,11 @@ const App: React.FC = () => {
   useEffect(() => {
       const handleBeforeUnload = () => {
           if (portfolioStateRef.current.designs.length > 0) {
- palette-a11y-fix-app-6281512874906153979
              try {
                 localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioStateRef.current));
              } catch (e) {
                 console.error("Failed to save on unload", e);
              }
-
-             localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioStateRef.current));
- palette-skip-link-nav-16199029736191852184
-
- sentinel/input-validation-fix-10639127908878875387
- main
           }
       };
       window.addEventListener('beforeunload', handleBeforeUnload);
@@ -144,95 +137,13 @@ const App: React.FC = () => {
             } else {
                 console.error("Failed to save portfolio:", e);
             }
- palette-skip-link-nav-16199029736191852184
           }
       }
   }, [portfolioState]); // Added dependency to trigger the quota check/save
 
-
- main
- main
-          }
-      }
-  }, [portfolioState]); // Added dependency to trigger on change
-
-  const lastQuotaAlert = useRef(0);
-
-  const lastQuotaAlert = useRef(0);
- main
+      // Debounce persistence removed in favor of direct robust save above
 
   useEffect(() => {
-      // Debounce persistence to prevent blocking main thread with heavy JSON serialization
-      // during rapid state updates (e.g. generating multiple designs).
-      // Note: The immediate save above handles quota errors more robustly,
-      // but this debounce handles the "happy path" performance.
-      // However, having both might be redundant or conflicting if not careful.
-      // The block above seems to be intended as the MAIN save logic but is inside useEffect without debounce?
-      // Wait, the original code had a debounce useEffect AND the quota logic.
-      // Let's look at the original structure in memory/context.
-      // The quota logic was likely the intended replacement or enhancement for the simple debounce.
-      const timeoutId = setTimeout(() => {
-          if (portfolioState.designs.length > 0) {
-              try {
-                localStorage.setItem('tc_portfolio_state', JSON.stringify(portfolioState));
-              } catch (e: any) {
-                if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                    console.warn("Storage quota exceeded. Attempting to trim old data.");
-
-                    // Iteratively remove oldest designs until it fits
-                    let trimmedDesigns = [...portfolioState.designs];
-                    let saved = false;
-
-                    while (trimmedDesigns.length > 0 && !saved) {
-                        trimmedDesigns.shift(); // Remove oldest
-                        const newState = { ...portfolioState, designs: trimmedDesigns };
-                        try {
-                            localStorage.setItem('tc_portfolio_state', JSON.stringify(newState));
-                            saved = true;
-
-                            // Update state to match persistence so we don't try saving the big one again next render
-                            setPortfolioState(newState);
-
-                            // Throttle alert to avoid spamming
-                            const now = Date.now();
-                            if (now - lastQuotaAlert.current > 30000) {
-                                alert("Storage limit reached. Oldest designs were automatically removed to make space.");
-                                lastQuotaAlert.current = now;
-                            }
-                        } catch (retryError) {
-                            // Continue loop
-                        }
-                    }
-
-                    if (!saved && trimmedDesigns.length === 0) {
- palette-a11y-fix-app-6281512874906153979
-                        console.error("Storage full. Could not save even after clearing designs.");
-                        // This implies other keys are taking up all space or quota is 0.
-                        const now = Date.now();
-                        if (now - lastQuotaAlert.current > 30000) {
-                            alert("Storage completely full. Unable to save your work.");
-                            lastQuotaAlert.current = now;
-                        }
-
-                         console.error("Storage full. Could not save even after clearing designs.");
-                         // This implies other keys are taking up all space or quota is 0.
-                         const now = Date.now();
-                         if (now - lastQuotaAlert.current > 30000) {
-                             alert("Storage completely full. Unable to save your work.");
-                             lastQuotaAlert.current = now;
-                         }
- main
-                    }
-                } else {
-                    console.error("Failed to save portfolio:", e);
-                }
-              }
-          }
-      }, 1000);
-
-      // For now, I will keep the quota logic as the primary saver since it handles errors.
-      // I will REMOVE the simple debounce useEffect to avoid double saving/race conditions.
-
       localStorage.setItem('tc_app_settings', JSON.stringify(appSettings));
   }, [appSettings]);
 
