@@ -15,7 +15,7 @@ export const DesignGridItem: React.FC<DesignGridItemProps> = React.memo(({ desig
       <img
         src={design.modifiedUrl || design.originalUrl}
         className="w-full h-full object-cover"
-        alt={`Design ${index + 1}`}
+        alt={design.promptUsed ? `Design ${index + 1}: ${design.promptUsed}` : `Design ${index + 1}`}
         loading="lazy"
         decoding="async"
       />
@@ -26,11 +26,11 @@ export const DesignGridItem: React.FC<DesignGridItemProps> = React.memo(({ desig
       </div>
 
       {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
+      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
           <Tooltip content="Inspect & Edit">
             <button
                 onClick={() => onSelect(design.id)}
-                className="p-3 bg-white rounded-full text-black hover:scale-110 transition-transform shadow-lg"
+                className="p-3 bg-white rounded-full text-black hover:scale-110 transition-transform shadow-lg focus-visible:ring-2 focus-visible:ring-accent-gold outline-none"
                 aria-label={`Inspect design ${index + 1}`}
             >
                 <ZoomIn className="w-5 h-5" />
