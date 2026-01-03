@@ -15,7 +15,7 @@ export const DesignGridItem: React.FC<DesignGridItemProps> = React.memo(({ desig
       <img
         src={design.modifiedUrl || design.originalUrl}
         className="w-full h-full object-cover"
-        alt={`Design ${index + 1}`}
+        alt={design.promptUsed || design.fullPrompt || `Design ${index + 1}`}
         loading="lazy"
         decoding="async"
       />
@@ -25,8 +25,8 @@ export const DesignGridItem: React.FC<DesignGridItemProps> = React.memo(({ desig
           #{index + 1}
       </div>
 
-      {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
+      {/* Hover Overlay - Visible on Hover OR when button inside has focus */}
+      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
           <Tooltip content="Inspect & Edit">
             <button
                 onClick={() => onSelect(design.id)}
