@@ -4,7 +4,7 @@ import { DesignData, AppTier, PaperSize, BodyPlacement, ProjectMode, ClientWaive
 import { Printer, Download, RefreshCw, Edit3, X, ZoomIn, Lock, Layers, Palette, FileSignature, Info } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import { DesignGridItem } from './DesignGridItem';
-import { escapeHtml } from '../utils/security';
+import { escapeHtml, sanitizeUrl } from '../utils/security';
 
 interface DesignViewerProps {
   designs: DesignData[];
@@ -78,7 +78,7 @@ export const BookViewer: React.FC<DesignViewerProps> = React.memo(({
           </div>
           ${list.map(p => `
             <div class="page">
-              <img src="${escapeHtml(p.modifiedUrl || p.originalUrl || '')}" />
+              <img src="${escapeHtml(sanitizeUrl(p.modifiedUrl || p.originalUrl || ''))}" />
               <div class="meta">
                  TATTOOCRATE REF: ${escapeHtml(p.id)} | CONCEPT: ${escapeHtml(concept.toUpperCase())}
               </div>
@@ -93,7 +93,9 @@ export const BookViewer: React.FC<DesignViewerProps> = React.memo(({
 
   const handleDownload = (design: DesignData) => {
     const link = document.createElement('a');
-    link.href = design.modifiedUrl || design.originalUrl;
+    // 🛡️ SENTINEL: Prevent XSS
+    // Ensure the URL is safe (http, https, or data) to prevent javascript: execution
+    link.href = sanitizeUrl(design.modifiedUrl || design.originalUrl);
     link.download = `TattooCrate-${concept.replace(/\s+/g, '-')}-${design.id}.png`;
     link.click();
   };
