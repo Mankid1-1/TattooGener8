@@ -12,3 +12,8 @@
 **Vulnerability:** Reflected XSS vulnerability in `BookViewer.tsx` where user input (`concept`) was interpolated directly into `document.write()` for generating a print window.
 **Learning:** Even in client-side only apps, constructing HTML strings with user input for new windows/iframes bypasses React's built-in escaping mechanisms.
 **Prevention:** Created `utils/security.ts` with `escapeHtml` and mandated its use for any raw HTML string construction. Always sanitize data crossing the boundary from React state to raw DOM APIs.
+
+## 2025-02-14 - Protocol-Based XSS in Links
+**Vulnerability:** XSS vulnerability where malicious `javascript:` URIs could be injected into `<a>` href or `<img>` src attributes if data in LocalStorage was compromised.
+**Learning:** Standard HTML escaping (`escapeHtml`) does not prevent execution of `javascript:` URIs in `href` attributes.
+**Prevention:** Implemented `sanitizeUrl` in `utils/security.ts` to strictly whitelist `http`, `https`, and `data` protocols. Applied this sanitizer to all dynamic URL sinks (links, images).

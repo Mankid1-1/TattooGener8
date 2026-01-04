@@ -19,3 +19,28 @@ export const escapeHtml = (str: string): string => {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 };
+
+/**
+ * Sanitizes a URL to ensure it uses a safe protocol (http, https, or data).
+ * Prevents javascript: URI attacks.
+ *
+ * @param url The URL to sanitize
+ * @returns The original URL if safe, or 'about:blank' if unsafe
+ */
+export const sanitizeUrl = (url: string): string => {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    if (['http:', 'https:', 'data:'].includes(parsed.protocol)) {
+      return url;
+    }
+  } catch (e) {
+    // If URL parsing fails, it might be a relative URL (which is fine if not starting with javascript:)
+    // But for this app, we expect absolute URLs or data URIs for images.
+    // Let's do a basic check for javascript: at the start
+    if (!url.trim().toLowerCase().startsWith('javascript:')) {
+         return url;
+    }
+  }
+  return 'about:blank';
+};
