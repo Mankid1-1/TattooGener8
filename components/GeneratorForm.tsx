@@ -136,15 +136,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
           {/* Inspiration Rail */}
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
             {INSPIRATION_PROMPTS.map((prompt) => (
-              <Tooltip key={prompt.text} content="Use this concept">
-                <button
-                  onClick={() => setConcept(prompt.text)}
-                  className="snap-start flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-ink-900 border border-ink-700 rounded-md hover:border-accent-gold/50 hover:text-accent-gold transition-all text-xs font-bold text-ink-400 shadow-sm active:scale-95 uppercase tracking-wide"
-                >
-                  <span>{prompt.emoji}</span>
-                  <span>{prompt.text}</span>
-                </button>
-              </Tooltip>
+              <InspirationButton key={prompt.text} prompt={prompt} onSelect={setConcept} />
             ))}
           </div>
         </div>
@@ -162,20 +154,12 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {Object.values(BodyPlacement).filter(p => mode === ProjectMode.SINGLE ? true : p !== BodyPlacement.PAPER).map((place) => (
-                  <Tooltip key={place} content={`Select ${place}`} className="w-full h-full">
-                    <button
-                      aria-label={`Select placement: ${place}`}
-                      onClick={() => setPlacement(place)}
-                      className={`w-full h-full px-3 py-3 rounded-lg text-xs font-bold border transition-all flex items-center justify-center gap-2 ${
-                        placement === place 
-                          ? 'border-accent-gold bg-accent-gold/10 text-accent-gold' 
-                          : 'border-ink-700 bg-ink-900 text-ink-400 hover:border-ink-500'
-                      }`}
-                    >
-                      <span className="text-lg">{PLACEMENT_ICONS[place]}</span>
-                      {place.split(' (')[0].split(' / ')[0]}
-                    </button>
-                  </Tooltip>
+                  <PlacementButton
+                    key={place}
+                    place={place}
+                    isSelected={placement === place}
+                    onSelect={setPlacement}
+                  />
                 ))}
               </div>
             </div>
@@ -227,23 +211,7 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
             </label>
             <div className="grid grid-cols-2 gap-2 h-64 overflow-y-auto pr-1 custom-scrollbar">
                 {Object.values(TattooStyle).map((s) => (
-                    <Tooltip key={s} content={s} position="top" className="w-full">
-                      <button 
-                          onClick={() => setStyle(s)}
-                          className={`w-full p-3 rounded-lg border text-left transition-all group ${
-                              style === s 
-                              ? 'border-accent-gold bg-accent-gold/10' 
-                              : 'border-ink-700 bg-ink-900 hover:border-ink-500'
-                          }`}
-                      >
-                          <div className={`w-full h-12 rounded bg-ink-950 overflow-hidden relative mb-2 flex items-center justify-center ${style === s ? 'ring-1 ring-accent-gold' : ''}`}>
-                             <span className="text-2xl filter grayscale contrast-125 group-hover:filter-none transition-all">{getStyleEmoji(s)}</span>
-                          </div>
-                          <span className={`text-[10px] uppercase font-bold tracking-wider ${style === s ? 'text-accent-gold' : 'text-ink-400'}`}>
-                              {s.split(' ')[0]}
-                          </span>
-                      </button>
-                    </Tooltip>
+                    <StyleButton key={s} style={s} isSelected={style === s} onSelect={setStyle} />
                 ))}
             </div>
           </div>
@@ -280,6 +248,56 @@ export const GeneratorForm: React.FC<GeneratorFormProps> = React.memo(({ onGener
     </div>
   );
 });
+
+// ⚡ Bolt Optimization: Memoized Components to prevent re-renders on every keystroke
+const InspirationButton = React.memo(({ prompt, onSelect }: { prompt: {emoji: string, text: string}, onSelect: (t: string) => void }) => (
+  <Tooltip content="Use this concept">
+    <button
+      onClick={() => onSelect(prompt.text)}
+      className="snap-start flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-ink-900 border border-ink-700 rounded-md hover:border-accent-gold/50 hover:text-accent-gold transition-all text-xs font-bold text-ink-400 shadow-sm active:scale-95 uppercase tracking-wide"
+    >
+      <span>{prompt.emoji}</span>
+      <span>{prompt.text}</span>
+    </button>
+  </Tooltip>
+));
+
+const PlacementButton = React.memo(({ place, isSelected, onSelect }: { place: BodyPlacement, isSelected: boolean, onSelect: (p: BodyPlacement) => void }) => (
+  <Tooltip content={`Select ${place}`} className="w-full h-full">
+    <button
+      aria-label={`Select placement: ${place}`}
+      onClick={() => onSelect(place)}
+      className={`w-full h-full px-3 py-3 rounded-lg text-xs font-bold border transition-all flex items-center justify-center gap-2 ${
+        isSelected
+          ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
+          : 'border-ink-700 bg-ink-900 text-ink-400 hover:border-ink-500'
+      }`}
+    >
+      <span className="text-lg">{PLACEMENT_ICONS[place]}</span>
+      {place.split(' (')[0].split(' / ')[0]}
+    </button>
+  </Tooltip>
+));
+
+const StyleButton = React.memo(({ style, isSelected, onSelect }: { style: TattooStyle, isSelected: boolean, onSelect: (s: TattooStyle) => void }) => (
+  <Tooltip content={style} position="top" className="w-full">
+    <button
+        onClick={() => onSelect(style)}
+        className={`w-full p-3 rounded-lg border text-left transition-all group ${
+            isSelected
+            ? 'border-accent-gold bg-accent-gold/10'
+            : 'border-ink-700 bg-ink-900 hover:border-ink-500'
+        }`}
+    >
+        <div className={`w-full h-12 rounded bg-ink-950 overflow-hidden relative mb-2 flex items-center justify-center ${isSelected ? 'ring-1 ring-accent-gold' : ''}`}>
+            <span className="text-2xl filter grayscale contrast-125 group-hover:filter-none transition-all">{getStyleEmoji(style)}</span>
+        </div>
+        <span className={`text-[10px] uppercase font-bold tracking-wider ${isSelected ? 'text-accent-gold' : 'text-ink-400'}`}>
+            {style.split(' ')[0]}
+        </span>
+    </button>
+  </Tooltip>
+));
 
 // Helper for style visuals
 const getStyleEmoji = (style: TattooStyle) => {
