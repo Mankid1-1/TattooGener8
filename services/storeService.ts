@@ -1,5 +1,6 @@
 
 import { AppTier, Product } from "../types";
+import { generateChecksum, verifyChecksum } from "../utils/security";
 
 // This service mocks the Native Bridge (StoreKit/BillingClient)
 // In a real Cordova/Capacitor app, this would call native plugins.
@@ -34,20 +35,55 @@ export const purchaseSubscription = async (): Promise<boolean> => {
 };
 
 export const restorePurchases = async (): Promise<AppTier> => {
-  return new Promise((resolve) => {
     console.log("[StoreKit] Restoring Receipts...");
     
-    setTimeout(() => {
-      // Check local storage or remote DB for active sub
-      // Simulating a successful restore for demo purposes if they previously bought
-      const hasPreviousPurchase = localStorage.getItem('cc_has_purchased') === 'true';
-      
-      console.log(`[StoreKit] Restore Complete. Found: ${hasPreviousPurchase}`);
-      resolve(hasPreviousPurchase ? AppTier.PRO : AppTier.FREE);
-    }, 2000);
-  });
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // 🛡️ SENTINEL: Secure Storage Check
+    // Instead of a simple boolean, we check for a signed license object.
+    const storedLicense = localStorage.getItem('tc_license_data');
+    if (!storedLicense) {
+        console.log("[StoreKit] No license found.");
+        return AppTier.FREE;
+    }
+
+    try {
+        const { data, checksum } = JSON.parse(storedLicense);
+        const isValid = await verifyChecksum(data, checksum);
+
+        if (isValid) {
+            const parsedData = JSON.parse(data);
+            if (parsedData.tier === AppTier.PRO) {
+                console.log("[StoreKit] Valid PRO license found.");
+                return AppTier.PRO;
+            }
+        } else {
+            console.error("[StoreKit] License tampering detected. Checksum mismatch.");
+        }
+    } catch (e) {
+        console.error("[StoreKit] Error parsing license data:", e);
+    }
+
+    return AppTier.FREE;
 };
 
-export const setPurchaseFlag = () => {
-  localStorage.setItem('cc_has_purchased', 'true');
+export const setPurchaseFlag = async () => {
+    // 🛡️ SENTINEL: Secure Storage Write
+    // Store signed data to prevent trivial local storage manipulation
+    const licenseData = JSON.stringify({
+        tier: AppTier.PRO,
+        timestamp: Date.now(),
+        deviceId: 'browser-device' // Placeholder
+    });
+
+    const checksum = await generateChecksum(licenseData);
+
+    localStorage.setItem('tc_license_data', JSON.stringify({
+        data: licenseData,
+        checksum
+    }));
+
+    // Legacy cleanup
+    localStorage.removeItem('cc_has_purchased');
 };
